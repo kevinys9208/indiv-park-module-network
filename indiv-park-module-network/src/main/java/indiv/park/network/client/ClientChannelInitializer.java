@@ -1,8 +1,10 @@
 package indiv.park.network.client;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 
+import indiv.park.network.client.config.ClientConnectionInfo;
 import indiv.park.network.processor.ProcessDistinguisher;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -12,10 +14,12 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
 
 	private final List<Class<?>> clientHandlerList;
 	private final ProcessDistinguisher distinguisher;
+	private final ClientConnectionInfo info;
 
-	public ClientChannelInitializer(List<Class<?>> clientHandlerList, ProcessDistinguisher distinguisher) {
+	public ClientChannelInitializer(List<Class<?>> clientHandlerList, ProcessDistinguisher distinguisher, ClientConnectionInfo info) {
 		this.clientHandlerList = clientHandlerList;
 		this.distinguisher = distinguisher;
+		this.info = info;
 	}
 
 	@Override
@@ -25,20 +29,23 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
 
 	private void addPipeLine(SocketChannel ch, Class<?> clazz) {
 		try {
+			List<Object> parameterList = new ArrayList<Object>();
+			
 			Constructor<?>[] constructors = clazz.getConstructors();
+			Constructor<?> constructor = constructors[0];
 
-			ChannelHandler channelHandler = null;
-			for (Constructor<?> constructor : constructors) {
-				if (constructor.getParameterCount() == 0) {
-					channelHandler = (ChannelHandler) constructor.newInstance();
-					break;
+			Class<?>[] parameterTypes = constructor.getParameterTypes();
+			for (Class<?> c : parameterTypes) {
+				if (c.equals(ProcessDistinguisher.class)) {
+					parameterList.add(distinguisher);
+					continue;
 				}
-				if (constructor.getParameterCount() == 1 && constructor.getParameterTypes()[0].equals(ProcessDistinguisher.class)) {
-					channelHandler = (ChannelHandler) constructor.newInstance(distinguisher);
-					break;
+				if (c.equals(ClientConnectionInfo.class)) {
+					parameterList.add(info);
+					continue;
 				}
 			}
-			ch.pipeline().addLast(channelHandler);
+			ch.pipeline().addLast((ChannelHandler) constructor.newInstance(parameterList.toArray()));
 
 		} catch (Throwable e) {
 			throw new RuntimeException("파이프라인에 핸들러를 등록하지 못했습니다.");

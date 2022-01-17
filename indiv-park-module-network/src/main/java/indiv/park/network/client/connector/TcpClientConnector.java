@@ -36,7 +36,7 @@ public class TcpClientConnector extends ClientConnector {
 			bootstrap
 				.group(workerGroup)
 				.channel(NioSocketChannel.class)
-				.handler(new ClientChannelInitializer(clientHandlerList, distinguisher))
+				.handler(new ClientChannelInitializer(clientHandlerList, distinguisher, info))
 				.option(ChannelOption.SO_KEEPALIVE, true)
 				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, info.getTimeout() * 1000);
 
