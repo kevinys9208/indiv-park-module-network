@@ -1,15 +1,16 @@
 package indiv.park.network.processor;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import indiv.park.network.annotation.ByteOperationCode;
-import indiv.park.network.annotation.StringOperationCode;
 import indiv.park.network.exception.SameOperationCodeException;
-import indiv.park.network.processor.exception.NoProcessorFoundException;
+import indiv.park.network.processor.annotation.Process;
+import indiv.park.network.processor.annotation.opcode.ByteOpCode;
+import indiv.park.network.processor.annotation.opcode.StringOpCode;
+import indiv.park.network.processor.exception.NoProcessFoundException;
 import indiv.park.network.processor.inheritance.DataWrapper;
 import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.Channel;
@@ -17,39 +18,42 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class ProcessDistinguisher {
 
-	private final ConcurrentMap<Object, Class<?>> processorMap = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Object, Method> processMap = new ConcurrentHashMap<>();
 
 	public void addProcessor(Class<?> clazz) {
-		Object operationCode = getOperationCode(clazz);
+		Method[] methods = clazz.getDeclaredMethods();
 		
-		if (processorMap.containsKey(operationCode)) {
-			throw new SameOperationCodeException();
+		for (Method method : methods) {
+			if (method.getAnnotation(Process.class) != null) {
+				Object opCode = getOperationCode(method);
+				
+				if (processMap.containsKey(opCode)) {
+					throw new SameOperationCodeException();
+				}
+				processMap.put(opCode, method);
+			}
 		}
-		processorMap.put(operationCode, clazz);
 	}
 
-	private Object getOperationCode(Class<?> clazz) {
-		if (clazz.getAnnotation(ByteOperationCode.class) != null) {
-			return clazz.getAnnotation(ByteOperationCode.class).value();
+	private Object getOperationCode(Method method) {
+		if (method.getAnnotation(ByteOpCode.class) != null) {
+			return method.getAnnotation(ByteOpCode.class).value();
 		}
-		if (clazz.getAnnotation(StringOperationCode.class) != null) {
-			return clazz.getAnnotation(StringOperationCode.class).value();
+		if (method.getAnnotation(StringOpCode.class) != null) {
+			return method.getAnnotation(StringOpCode.class).value();
 		}
 		return null;
 	}
 
 	public void distinguish(ChannelHandlerContext ctx, DataWrapper dataWrapper) throws Exception {
-		Class<?> clazz = processorMap.get(dataWrapper.getOperationKey());
-		if (clazz == null) {
-			throw new NoProcessorFoundException();
+		Method method = processMap.get(dataWrapper.getOperationKey());
+		if (method == null) {
+			throw new NoProcessFoundException();
 		}
 
 		List<Object> parameterList = new ArrayList<Object>();
 
-		Constructor<?>[] constructors = clazz.getConstructors();
-		Constructor<?> constructor = constructors[0];
-
-		Class<?>[] parameterTypes = constructor.getParameterTypes();
+		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (Class<?> c : parameterTypes) {
 			if (c.equals(ChannelHandlerContext.class)) {
 				parameterList.add(ctx);
@@ -64,6 +68,19 @@ public class ProcessDistinguisher {
 				continue;
 			}
 		}
-		TaskExecutor.execute((Runnable) constructor.newInstance(parameterList.toArray()));
+		
+		TaskExecutor.execute(() -> this.executeMethod(method, parameterList));
+	}
+	
+	private void executeMethod(Method method, List<Object> parameterList) {
+		try {
+			Class<?> clazz = method.getDeclaringClass();
+			Object processor = clazz.getConstructor().newInstance();
+			
+			method.invoke(processor, parameterList.toArray());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
