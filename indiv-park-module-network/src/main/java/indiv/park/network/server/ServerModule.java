@@ -15,6 +15,7 @@ import indiv.park.network.server.binder.ServerType;
 import indiv.park.network.server.config.ServerConfiguration;
 import indiv.park.network.server.inheritance.ServerBinder;
 import indiv.park.starter.annotation.Module;
+import indiv.park.starter.exception.ModuleException;
 import indiv.park.starter.inheritance.ModuleBase;
 import indiv.park.starter.module.future.ResponseFuture;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class ServerModule implements ModuleBase {
 	}
 
 	@Override
-	public void initialize(Class<?> mainClass) {
+	public void initialize(Class<?> mainClass) throws ModuleException {
 		if (configuration != null) {
 			addUserServerConfiguration();
 		}

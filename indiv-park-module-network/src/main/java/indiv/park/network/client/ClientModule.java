@@ -18,6 +18,7 @@ import indiv.park.network.client.connector.ClientType;
 import indiv.park.network.client.inheritance.ClientConnector;
 import indiv.park.network.processor.ProcessDistinguisher;
 import indiv.park.starter.annotation.Module;
+import indiv.park.starter.exception.ModuleException;
 import indiv.park.starter.inheritance.ModuleBase;
 import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.EventLoopGroup;
@@ -41,7 +42,7 @@ public class ClientModule implements ModuleBase {
 	}
 
 	@Override
-	public void initialize(Class<?> mainClass) {
+	public void initialize(Class<?> mainClass) throws ModuleException {
 		if (configuration != null) {
 			addUserClientConfiguration();
 		}
