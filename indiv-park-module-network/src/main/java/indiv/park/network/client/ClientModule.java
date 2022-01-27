@@ -18,7 +18,6 @@ import indiv.park.network.client.connector.ClientType;
 import indiv.park.network.client.inheritance.ClientConnector;
 import indiv.park.network.processor.ProcessDistinguisher;
 import indiv.park.starter.annotation.Module;
-import indiv.park.starter.exception.ModuleException;
 import indiv.park.starter.inheritance.ModuleBase;
 import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.EventLoopGroup;
@@ -27,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Module(name = "client")
 @Slf4j
-public class ClientModule implements ModuleBase {
+public final class ClientModule implements ModuleBase {
 
 	public static final ClientModule INSTANCE = new ClientModule();
 	
@@ -38,11 +37,10 @@ public class ClientModule implements ModuleBase {
 	private Set<Class<?>> processorSet;
 	private Object configuration;
 	
-	private ClientModule() {
-	}
+	private ClientModule() {}
 
 	@Override
-	public void initialize(Class<?> mainClass) throws ModuleException {
+	public void initialize(Class<?> mainClass) {
 		if (configuration != null) {
 			addUserClientConfiguration();
 		}

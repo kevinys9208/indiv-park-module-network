@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Module(name = "server")
 @Slf4j
-public class ServerModule implements ModuleBase {
+public final class ServerModule implements ModuleBase {
 
 	public static final ServerModule INSTANCE = new ServerModule();
 	
@@ -32,8 +32,7 @@ public class ServerModule implements ModuleBase {
 	private Set<Class<?>> processorSet;
 	private Object configuration;
 
-	private ServerModule() {
-	}
+	private ServerModule() {}
 
 	@Override
 	public void initialize(Class<?> mainClass) throws ModuleException {
@@ -159,6 +158,7 @@ public class ServerModule implements ModuleBase {
 	
 	public void closeGracefully() {
 		ServerChannelGroup.INSTANCE.close();
+		
 		logger.info("서버를 안전하게 종료하였습니다.");
 	}
 }

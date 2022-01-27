@@ -12,26 +12,40 @@ import indiv.park.network.processor.annotation.opcode.ByteOpCode;
 import indiv.park.network.processor.annotation.opcode.StringOpCode;
 import indiv.park.network.processor.exception.NoProcessFoundException;
 import indiv.park.network.processor.inheritance.DataWrapper;
+import indiv.park.starter.exception.ModuleException;
 import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
-public class ProcessDistinguisher {
+@Slf4j
+public final class ProcessDistinguisher {
 
+	private final ConcurrentMap<String, Object> processorMap = new ConcurrentHashMap<>();
 	private final ConcurrentMap<Object, Method> processMap = new ConcurrentHashMap<>();
+	
+	private final String ERROR_EXECUTE = "프로세스 메소드 실행에 실패하였습니다. [ Error: {} ]";
 
 	public void addProcessor(Class<?> clazz) {
-		Method[] methods = clazz.getDeclaredMethods();
-		
-		for (Method method : methods) {
-			if (method.getAnnotation(Process.class) != null) {
-				Object opCode = getOperationCode(method);
-				
-				if (processMap.containsKey(opCode)) {
-					throw new SameOperationCodeException();
+		try {
+			processorMap.put(clazz.getSimpleName(), clazz.getConstructor().newInstance());
+			
+			Method[] methods = clazz.getDeclaredMethods();
+			
+			for (Method method : methods) {
+				if (method.getAnnotation(Process.class) != null) {
+					Object opCode = getOperationCode(method);
+					
+					if (processMap.containsKey(opCode)) {
+						throw new SameOperationCodeException();
+					}
+					processMap.put(opCode, method);
 				}
-				processMap.put(opCode, method);
 			}
+			
+		} catch (Exception e) {
+			String msg = clazz.getSimpleName() + " 등록에 실패하였습니다.";
+			throw new ModuleException(msg, e.getCause());
 		}
 	}
 
@@ -75,12 +89,12 @@ public class ProcessDistinguisher {
 	private void executeMethod(Method method, List<Object> parameterList) {
 		try {
 			Class<?> clazz = method.getDeclaringClass();
-			Object processor = clazz.getConstructor().newInstance();
+			Object processor = processorMap.get(clazz.getSimpleName());
 			
 			method.invoke(processor, parameterList.toArray());
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(ERROR_EXECUTE, e.toString());
 		}
 	}
 }
