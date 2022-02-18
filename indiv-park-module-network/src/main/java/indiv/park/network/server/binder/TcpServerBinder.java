@@ -39,6 +39,7 @@ public class TcpServerBinder extends ServerBinder {
 					.group(bossGroup, workerGroup)
 					.channel(NioServerSocketChannel.class)
 					.childHandler(new ServerChannelInitializer(serverHandlerList, distinguisher))
+					.option(ChannelOption.TCP_NODELAY, true)
 					.option(ChannelOption.SO_REUSEADDR, true)
 					.option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
