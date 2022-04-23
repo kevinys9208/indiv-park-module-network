@@ -34,8 +34,8 @@ public class WsServerBinder extends ServerBinder {
 				throw new NoHandlerFoundException();
 			}
 			
-			bossGroup = new NioEventLoopGroup(config.getBossThread());
-			workerGroup = new NioEventLoopGroup(config.getWorkerThread());
+			bossGroup = new NioEventLoopGroup(config.bossThread);
+			workerGroup = new NioEventLoopGroup(config.workerThread);
 			ServerBootstrap serverBootstrap = new ServerBootstrap();
 			serverBootstrap
 					.group(bossGroup, workerGroup)
@@ -45,10 +45,10 @@ public class WsServerBinder extends ServerBinder {
 					.option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
 
-			ChannelFuture f = serverBootstrap.bind(config.getPort()).sync();
+			ChannelFuture f = serverBootstrap.bind(config.port).sync();
 			
 			ServerChannelGroup.INSTANCE.add(f.channel());
-			logger.info(BIND_LOG, config.getGroup(), config.getPort());
+			logger.info(BIND_LOG, config.group, config.port);
 			
 			if (future != null) {
 				future.setResponse(true);

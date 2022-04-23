@@ -59,7 +59,7 @@ public final class ClientModule implements ModuleBase {
 	@SuppressWarnings("unchecked")
 	private void addUserClientConfiguration() {
 		List<Map<String, Object>> clientConfigList = (List<Map<String, Object>>) configuration;
-		clientConfigList.forEach(config -> clientList.add(new ClientConfiguration(config)));
+		clientConfigList.forEach(config -> clientList.add(ClientConfiguration.newCongiguration(config)));
 	}
 
 	private void loadHandlerList(Reflections reflections) {
@@ -93,7 +93,7 @@ public final class ClientModule implements ModuleBase {
 		ClientConfiguration configuration;
 		configuration = clientList
 								.stream()
-								.filter(config -> config.getGroup().equals(group))
+								.filter(config -> config.group.equals(group))
 								.findFirst()
 								.orElse(null);
 		
@@ -121,11 +121,11 @@ public final class ClientModule implements ModuleBase {
 	}
 
 	private ClientConnector createClientConnector(ClientConnectionInfo info, ClientConfiguration config) {
-		ClientConnector connector = ClientType.valueOf(config.getType().toUpperCase()).loadClientConnectorByType(info);
+		ClientConnector connector = ClientType.valueOf(config.type.toUpperCase()).loadClientConnectorByType(info);
 
 		handlerSet
 				.stream()
-				.filter(clazz -> findGroupHandler(clazz, config.getGroup()))
+				.filter(clazz -> findGroupHandler(clazz, config.group))
 				.sorted(this::compareHandlerOrder)
 				.forEach(clazz -> addClientHandler(connector, clazz));
 		
@@ -139,10 +139,10 @@ public final class ClientModule implements ModuleBase {
 		return false;
 	}
 
-	private int compareHandlerOrder(Class<?> o1, Class<?> o2) {
-		int first = o1.getAnnotation(ClientHandler.class).order();
-		int second = o2.getAnnotation(ClientHandler.class).order();
-		return first - second;
+	private int compareHandlerOrder(Class<?> firstHandler, Class<?> secondHandler) {
+		int firstHandlerOrder = firstHandler.getAnnotation(ClientHandler.class).order();
+		int secondHandlerOrder = secondHandler.getAnnotation(ClientHandler.class).order();
+		return firstHandlerOrder - secondHandlerOrder;
 	}
 
 	private void addClientHandler(ClientConnector clientConnector, Class<?> clazz) {
@@ -153,13 +153,13 @@ public final class ClientModule implements ModuleBase {
 		EventLoopGroup workerGroup;
 		ProcessDistinguisher distinguisher;
 
-		SharableGroup sharableGroup = sharableGroupMap.get(config.getGroup());
+		SharableGroup sharableGroup = sharableGroupMap.get(config.group);
 		if (sharableGroup == null) {
-			workerGroup = new NioEventLoopGroup(config.getWorkerThread());
-			distinguisher = createProcessDistinguisher(config.getGroup());
+			workerGroup = new NioEventLoopGroup(config.workerThread);
+			distinguisher = createProcessDistinguisher(config.group);
 
 			SharableGroup group = new SharableGroup(workerGroup, distinguisher);
-			sharableGroupMap.put(config.getGroup(), group);
+			sharableGroupMap.put(config.group, group);
 
 		} else {
 			workerGroup = sharableGroup.getEventLoopGroup();

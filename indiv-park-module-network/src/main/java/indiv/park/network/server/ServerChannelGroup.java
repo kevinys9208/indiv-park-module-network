@@ -17,6 +17,7 @@ public class ServerChannelGroup {
 	
 	private final Map<ChannelId, Channel> channelMap = new ConcurrentHashMap<>();
 	private final ChannelFutureListener remover = new ChannelFutureListener() {
+		
 		@Override
 		public void operationComplete(ChannelFuture future) throws Exception {
 			remove(future.channel());

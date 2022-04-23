@@ -19,11 +19,11 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
 	}
 
 	@Override
-	public void initChannel(SocketChannel ch) throws Exception {
-		serverHandlerList.forEach(clazz -> addPipeLine(ch, clazz));
+	public void initChannel(SocketChannel channel) throws Exception {
+		serverHandlerList.forEach(clazz -> addPipeLine(channel, clazz));
 	}
 
-	private void addPipeLine(SocketChannel ch, Class<?> clazz) {
+	private void addPipeLine(SocketChannel channel, Class<?> clazz) {
 		try {
 			Constructor<?>[] constructors = clazz.getConstructors();
 
@@ -38,7 +38,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
 					break;
 				}
 			}
-			ch.pipeline().addLast(channelHandler);
+			channel.pipeline().addLast(channelHandler);
 			
 		} catch (Exception e) {
 			throw new RuntimeException("파이프라인에 핸들러를 등록하지 못했습니다.");

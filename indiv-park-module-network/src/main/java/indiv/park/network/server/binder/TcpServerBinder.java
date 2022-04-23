@@ -32,8 +32,8 @@ public class TcpServerBinder extends ServerBinder {
 				throw new NoHandlerFoundException();
 			}
 			
-			bossGroup = new NioEventLoopGroup(config.getBossThread());
-			workerGroup = new NioEventLoopGroup(config.getWorkerThread());
+			bossGroup 	= new NioEventLoopGroup(config.bossThread);
+			workerGroup = new NioEventLoopGroup(config.workerThread);
 			ServerBootstrap serverBootstrap = new ServerBootstrap();
 			serverBootstrap
 					.group(bossGroup, workerGroup)
@@ -43,10 +43,10 @@ public class TcpServerBinder extends ServerBinder {
 					.option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
 
-			ChannelFuture f = serverBootstrap.bind(config.getPort()).sync();
+			ChannelFuture f = serverBootstrap.bind(config.port).sync();
 			
 			ServerChannelGroup.INSTANCE.add(f.channel());
-			logger.info(BIND_LOG, config.getGroup(), config.getPort());
+			logger.info(BIND_LOG, config.group, config.port);
 			
 			if (future != null) {
 				future.setResponse(true);
@@ -57,12 +57,8 @@ public class TcpServerBinder extends ServerBinder {
 			logger.error("서버를 바인딩 하던 중 예외가 발생하였습니다. [ {} ]", e.toString());
 			
 		} finally {
-			if (workerGroup != null) {
-				workerGroup.shutdownGracefully(1, 1000, TimeUnit.MILLISECONDS).syncUninterruptibly();
-			}
-			if (bossGroup != null) {
-				bossGroup.shutdownGracefully(1, 1000, TimeUnit.MILLISECONDS).syncUninterruptibly();
-			}
+			if (workerGroup != null)	workerGroup.shutdownGracefully(1, 1000, TimeUnit.MILLISECONDS).syncUninterruptibly();
+			if (bossGroup != null)		bossGroup.shutdownGracefully(1, 1000, TimeUnit.MILLISECONDS).syncUninterruptibly();
 		}
 	}
 }

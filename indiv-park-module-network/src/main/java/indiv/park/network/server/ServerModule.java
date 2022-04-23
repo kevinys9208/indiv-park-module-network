@@ -54,7 +54,7 @@ public final class ServerModule implements ModuleBase {
 	@SuppressWarnings("unchecked")
 	private void addUserServerConfiguration() {
 		List<Map<String, Object>> serverConfigList = (List<Map<String, Object>>) configuration;
-		serverConfigList.forEach(config -> serverList.add(new ServerConfiguration(config)));
+		serverConfigList.forEach(config -> serverList.add(ServerConfiguration.newConfiguration(config)));
 	}
 
 	private void loadHandlerList(Reflections reflections) {
@@ -82,7 +82,7 @@ public final class ServerModule implements ModuleBase {
 	public void bind(String group, boolean sync) {
 		ServerConfiguration configuration = serverList
 												.stream()
-												.filter(config -> config.getGroup().equals(group))
+												.filter(config -> config.group.equals(group))
 												.findFirst()
 												.orElse(null);
 		if (configuration == null) {
@@ -97,17 +97,17 @@ public final class ServerModule implements ModuleBase {
 	}
 
 	private ServerBinder createServerBinder(ServerConfiguration config) {
-		ServerBinder serverBinder = ServerType.valueOf(config.getType().toUpperCase()).loadServerBinder(config);
+		ServerBinder serverBinder = ServerType.valueOf(config.type.toUpperCase()).loadServerBinder(config);
 		ProcessDistinguisher distinguisher = new ProcessDistinguisher();
 		handlerSet
 				.stream()
-				.filter(clazz -> findGroupHandler(clazz, config.getGroup()))
+				.filter(clazz -> findGroupHandler(clazz, config.group))
 				.sorted(this::compareHandlerOrder)
 				.forEach(clazz -> serverBinder.addServerHandler(clazz));
 
 		processorSet
 				.stream()
-				.filter(clazz -> findGroupProcessor(clazz, config.getGroup()))
+				.filter(clazz -> findGroupProcessor(clazz, config.group))
 				.forEach(clazz -> distinguisher.addProcessor(clazz));
 
 		serverBinder.addProcessDistinguisher(distinguisher);
@@ -122,10 +122,10 @@ public final class ServerModule implements ModuleBase {
 		return false;
 	}
 
-	private int compareHandlerOrder(Class<?> o1, Class<?> o2) {
-		int first = o1.getAnnotation(ServerHandler.class).order();
-		int second = o2.getAnnotation(ServerHandler.class).order();
-		return first - second;
+	private int compareHandlerOrder(Class<?> firstHandler, Class<?> secondHandler) {
+		int firstHandlerOrder = firstHandler.getAnnotation(ServerHandler.class).order();
+		int secondHandlerOrder = secondHandler.getAnnotation(ServerHandler.class).order();
+		return firstHandlerOrder - secondHandlerOrder;
 	}
 
 	private boolean findGroupProcessor(Class<?> clazz, String group) {
@@ -143,8 +143,7 @@ public final class ServerModule implements ModuleBase {
 			return;
 		}
 		
-		ResponseFuture<String, Boolean> future = new ResponseFuture<>(group);
-		binder.setResponseFuture(future);
+		ResponseFuture<String, Boolean> future = binder.setResponseFuture(group);
 		
 		newThread.start();
 		

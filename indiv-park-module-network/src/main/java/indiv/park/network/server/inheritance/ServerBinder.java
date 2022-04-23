@@ -9,7 +9,9 @@ import indiv.park.starter.module.future.ResponseFuture;
 import indiv.park.starter.module.future.ResponseFutureListener;
 
 public abstract class ServerBinder implements Runnable {
-
+	
+	protected final List<Class<?>> serverHandlerList = new ArrayList<>();
+	
 	protected ServerConfiguration config;
 	protected ProcessDistinguisher distinguisher;
 	protected ResponseFuture<String, Boolean> future;
@@ -22,8 +24,6 @@ public abstract class ServerBinder implements Runnable {
 		}
 	};
 	
-	protected List<Class<?>> serverHandlerList = new ArrayList<>();
-	
 	public void addServerHandler(Class<?> serverHandler) {
 		this.serverHandlerList.add(serverHandler);
 	}
@@ -32,8 +32,8 @@ public abstract class ServerBinder implements Runnable {
 		this.distinguisher = distinguisher;
 	}
 	
-	public void setResponseFuture(ResponseFuture<String, Boolean> future) {
-		this.future = future;
-		this.future.addRemover(remover);
+	public ResponseFuture<String, Boolean> setResponseFuture(String group) {
+		future = ResponseFuture.newInstance(group, remover);
+		return future;
 	}
 }
