@@ -14,11 +14,11 @@ public enum ServerType {
 
 	},
 	
-	WS() {
+	HTTP() {
 
 		@Override
 		public ServerBinder loadServerBinder(ServerConfiguration config) {
-			return new WsServerBinder(config);
+			return new HttpServerBinder(config);
 		}
 	};
 

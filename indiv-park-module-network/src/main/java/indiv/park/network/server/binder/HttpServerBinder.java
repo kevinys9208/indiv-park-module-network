@@ -17,11 +17,11 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class WsServerBinder extends ServerBinder {
+public class HttpServerBinder extends ServerBinder {
 	
 	private final String BIND_LOG = "'{}' 서버가 '{}' 포트에 바인드 되었습니다.";
 
-	public WsServerBinder(ServerConfiguration config) {
+	public HttpServerBinder(ServerConfiguration config) {
 		this.config = config;
 		this.serverHandlerList.add(HttpServerCodec.class);
 	}
