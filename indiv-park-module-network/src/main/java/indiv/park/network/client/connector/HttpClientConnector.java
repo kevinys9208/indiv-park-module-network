@@ -15,11 +15,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 
-public class WsClientConnector extends ClientConnector {
+public class HttpClientConnector extends ClientConnector {
 
-	private final Logger logger = LoggerFactory.getLogger(WsClientConnector.class);
+	private final Logger logger = LoggerFactory.getLogger(HttpClientConnector.class);
 
-	public WsClientConnector(ClientConnectionInfo info) {
+	public HttpClientConnector(ClientConnectionInfo info) {
 		this.info = info;
 		this.clientHandlerList.add(HttpClientCodec.class);
 	}

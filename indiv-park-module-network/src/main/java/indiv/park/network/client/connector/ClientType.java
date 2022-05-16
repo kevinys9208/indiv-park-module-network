@@ -11,13 +11,13 @@ public enum ClientType {
 		public ClientConnector loadClientConnectorByType(ClientConnectionInfo info) {
 			return new TcpClientConnector(info);
 		}
-	}
+	},
 	
-	,WS() {
+	HTTP() {
 		
 		@Override
 		public ClientConnector loadClientConnectorByType(ClientConnectionInfo info) {
-			return new WsClientConnector(info);
+			return new HttpClientConnector(info);
 		}
 	};
 	
