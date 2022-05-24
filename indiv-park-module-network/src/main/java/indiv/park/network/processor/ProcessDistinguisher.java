@@ -77,8 +77,8 @@ public final class ProcessDistinguisher {
 				parameterList.add(ctx.channel());
 				continue;
 			}
-			if (c.equals(DataWrapper.class)) {
-				parameterList.add(dataWrapper);
+			if (DataWrapper.class.isAssignableFrom(c)) {
+				parameterList.add(c.cast(dataWrapper));
 				continue;
 			}
 		}
