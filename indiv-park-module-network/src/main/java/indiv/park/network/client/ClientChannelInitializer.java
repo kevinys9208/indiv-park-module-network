@@ -2,6 +2,7 @@ package indiv.park.network.client;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import indiv.park.network.client.config.ClientConnectionInfo;
@@ -32,20 +33,29 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
 			List<Object> parameterList = new ArrayList<Object>();
 			
 			Constructor<?>[] constructors = clazz.getConstructors();
-			Constructor<?> constructor = constructors[0];
-
-			Class<?>[] parameterTypes = constructor.getParameterTypes();
-			for (Class<?> c : parameterTypes) {
-				if (c.equals(ProcessDistinguisher.class)) {
-					parameterList.add(distinguisher);
-					continue;
+			Constructor<?> constructor = Arrays
+											.stream(constructors)
+											.filter(v -> v.getParameterTypes().length == 0)
+											.findFirst()
+											.orElse(constructors[0]);
+			
+			if (constructor.getParameterCount() == 0) {
+				ch.pipeline().addLast((ChannelHandler) constructor.newInstance());
+				
+			} else {
+				Class<?>[] parameterTypes = constructor.getParameterTypes();
+				for (Class<?> c : parameterTypes) {
+					if (c.equals(ProcessDistinguisher.class)) {
+						parameterList.add(distinguisher);
+						continue;
+					}
+					if (c.equals(ClientConnectionInfo.class)) {
+						parameterList.add(info);
+						continue;
+					}
 				}
-				if (c.equals(ClientConnectionInfo.class)) {
-					parameterList.add(info);
-					continue;
-				}
+				ch.pipeline().addLast((ChannelHandler) constructor.newInstance(parameterList.toArray()));
 			}
-			ch.pipeline().addLast((ChannelHandler) constructor.newInstance(parameterList.toArray()));
 
 		} catch (Throwable e) {
 			throw new RuntimeException("파이프라인에 핸들러를 등록하지 못했습니다.");
