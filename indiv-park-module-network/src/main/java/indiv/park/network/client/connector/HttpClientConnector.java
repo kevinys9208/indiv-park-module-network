@@ -30,7 +30,7 @@ public class HttpClientConnector extends ClientConnector {
 			if (clientHandlerList.size() == 1) {
 				throw new NoHandlerFoundException();
 			}
-			if (info.getTimeout() > info.getCycle()) {
+			if (info.getCycle() != 0 && info.getTimeout() > info.getCycle()) {
 				throw new RuntimeException("재접속 주기가 타임아웃보다 짧습니다.");
 			}
 			
