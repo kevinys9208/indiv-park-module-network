@@ -7,6 +7,7 @@ import indiv.park.network.processor.ProcessDistinguisher;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import lombok.NonNull;
 
 public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -19,11 +20,9 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
 	}
 
 	@Override
-	public void initChannel(SocketChannel channel) throws Exception {
-		serverHandlerList.forEach(clazz -> addPipeLine(channel, clazz));
-	}
+	public void initChannel(@NonNull SocketChannel ch) { serverHandlerList.forEach(clazz -> addPipeLine(ch, clazz)); }
 
-	private void addPipeLine(SocketChannel channel, Class<?> clazz) {
+	private void addPipeLine(SocketChannel ch, Class<?> clazz) {
 		try {
 			Constructor<?>[] constructors = clazz.getConstructors();
 
@@ -38,7 +37,7 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
 					break;
 				}
 			}
-			channel.pipeline().addLast(channelHandler);
+			ch.pipeline().addLast(channelHandler);
 			
 		} catch (Exception e) {
 			throw new RuntimeException("파이프라인에 핸들러를 등록하지 못했습니다.");

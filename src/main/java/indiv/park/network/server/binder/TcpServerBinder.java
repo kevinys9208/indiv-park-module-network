@@ -18,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TcpServerBinder extends ServerBinder {
 
-	private final String BIND_LOG = "'{}' 서버가 '{}' 포트에 바인드 되었습니다.";
-	
 	public TcpServerBinder(ServerConfiguration config) {
 		this.config = config;
 	}
@@ -28,10 +26,9 @@ public class TcpServerBinder extends ServerBinder {
 	public void run() {
 		EventLoopGroup bossGroup = null, workerGroup = null;
 		try {
-			if (serverHandlerList.size() == 0) {
+			if (serverHandlerList.size() == 0)
 				throw new NoHandlerFoundException();
-			}
-			
+
 			bossGroup 	= new NioEventLoopGroup(config.bossThread);
 			workerGroup = new NioEventLoopGroup(config.workerThread);
 			ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -46,11 +43,13 @@ public class TcpServerBinder extends ServerBinder {
 			ChannelFuture f = serverBootstrap.bind(config.port).sync();
 			
 			ServerChannelGroup.INSTANCE.add(f.channel());
+
+			String BIND_LOG = "'{}' 서버가 '{}' 포트에 바인드 되었습니다.";
 			logger.info(BIND_LOG, config.group, config.port);
 			
-			if (future != null) {
+			if (future != null)
 				future.setResponse(true);
-			}
+
 			f.channel().closeFuture().sync();
 
 		} catch (Exception e) {

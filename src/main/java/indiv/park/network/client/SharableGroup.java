@@ -5,8 +5,8 @@ import io.netty.channel.EventLoopGroup;
 
 public class SharableGroup {
 
-	private EventLoopGroup eventLoopGroup;
-	private ProcessDistinguisher distinguisher;
+	private final EventLoopGroup eventLoopGroup;
+	private final ProcessDistinguisher distinguisher;
 
 	public SharableGroup(EventLoopGroup eventLoopGroup, ProcessDistinguisher distinguisher) {
 		this.eventLoopGroup = eventLoopGroup;

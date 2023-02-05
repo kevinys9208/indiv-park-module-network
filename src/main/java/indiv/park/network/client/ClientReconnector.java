@@ -1,10 +1,11 @@
 package indiv.park.network.client;
 
-import java.util.concurrent.TimeUnit;
-
 import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import lombok.NonNull;
+
+import java.util.concurrent.TimeUnit;
 
 public class ClientReconnector implements ChannelFutureListener {
 
@@ -17,7 +18,7 @@ public class ClientReconnector implements ChannelFutureListener {
 	}
 
 	@Override
-	public void operationComplete(ChannelFuture future) throws Exception {
+	public void operationComplete(@NonNull ChannelFuture future) throws Exception {
 		TaskExecutor.schedule(clientConnector, cycle, TimeUnit.SECONDS);
 	}
 }

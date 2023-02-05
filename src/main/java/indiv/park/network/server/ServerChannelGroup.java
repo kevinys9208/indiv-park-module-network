@@ -16,22 +16,14 @@ public class ServerChannelGroup {
 	public static final ServerChannelGroup INSTANCE = new ServerChannelGroup();
 	
 	private final Map<ChannelId, Channel> channelMap = new ConcurrentHashMap<>();
-	private final ChannelFutureListener remover = new ChannelFutureListener() {
-		
-		@Override
-		public void operationComplete(ChannelFuture future) throws Exception {
-			remove(future.channel());
-		}
-	};
+	private final ChannelFutureListener remover = future -> remove(future.channel());
 	
 	private ServerChannelGroup() {}
 
 	public boolean add(Channel channel) {
 		boolean added = channelMap.putIfAbsent(channel.id(), channel) == null;
-		if (added) {
+		if (added)
 			channel.closeFuture().addListener(remover);
-		}
-
 		return added;
 	}
 

@@ -25,13 +25,12 @@ public class TcpClientConnector extends ClientConnector {
 	@Override
 	public void run() {
 		try {
-			if (clientHandlerList.size() == 0) {
+			if (clientHandlerList.size() == 0)
 				throw new NoHandlerFoundException();
-			}
-			if (info.getCycle() != 0 && info.getTimeout() > info.getCycle()) {
+
+			if (info.getCycle() != 0 && info.getTimeout() > info.getCycle())
 				throw new RuntimeException("재접속 주기가 타임아웃보다 짧습니다.");
-			}
-			
+
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap
 				.group(workerGroup)

@@ -1,15 +1,5 @@
 package indiv.park.network.client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-import org.reflections.Reflections;
-
 import indiv.park.network.client.annotation.ClientHandler;
 import indiv.park.network.client.annotation.ClientProcessor;
 import indiv.park.network.client.config.ClientConfiguration;
@@ -23,6 +13,11 @@ import indiv.park.starter.module.TaskExecutor;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.Reflections;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Module(name = "client")
 @Slf4j
@@ -41,9 +36,8 @@ public final class ClientModule implements ModuleBase {
 
 	@Override
 	public void initialize(Class<?> mainClass) {
-		if (configuration != null) {
+		if (configuration != null)
 			addUserClientConfiguration();
-		}
 
 		Reflections reflections = new Reflections(mainClass.getPackage().getName());
 
@@ -104,10 +98,9 @@ public final class ClientModule implements ModuleBase {
 
 		for (ClientConnectionInfo info : connectionInfos) {
 			ClientConnector client = createClientConnector(info, configuration);
-			if (Objects.nonNull(client)) {
-				setSharableGroup(client, configuration);
-				connectClient(client, sync);
-			}
+
+			setSharableGroup(client, configuration);
+			connectClient(client, sync);
 		}
 	}
 
@@ -133,10 +126,7 @@ public final class ClientModule implements ModuleBase {
 	}
 
 	private boolean findGroupHandler(Class<?> clazz, String group) {
-		if (clazz.getAnnotation(ClientHandler.class).group().equals(group)) {
-			return true;
-		}
-		return false;
+		return clazz.getAnnotation(ClientHandler.class).group().equals(group);
 	}
 
 	private int compareHandlerOrder(Class<?> firstHandler, Class<?> secondHandler) {
@@ -175,16 +165,13 @@ public final class ClientModule implements ModuleBase {
 		processorSet
 				.stream()
 				.filter(clazz -> findGroupProcessor(clazz, group))
-				.forEach(clazz -> distinguisher.addProcessor(clazz));
+				.forEach(distinguisher::addProcessor);
 		
 		return distinguisher;
 	}
 
 	private boolean findGroupProcessor(Class<?> clazz, String group) {
-		if (clazz.getAnnotation(ClientProcessor.class).group().equals(group)) {
-			return true;
-		}
-		return false;
+		return clazz.getAnnotation(ClientProcessor.class).group().equals(group);
 	}
 
 	public void closeGracefully() {

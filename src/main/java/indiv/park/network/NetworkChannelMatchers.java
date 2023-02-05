@@ -31,7 +31,7 @@ public class NetworkChannelMatchers<T> {
 		return new CompositeChannelMatcher(channels, false);
 	}
 
-	private class CompositeChannelMatcher implements ChannelMatcher {
+	private static class CompositeChannelMatcher implements ChannelMatcher {
 
 		private final Channel[] channels;
 		private final boolean match;

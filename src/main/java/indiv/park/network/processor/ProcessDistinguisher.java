@@ -23,8 +23,6 @@ public final class ProcessDistinguisher {
 
 	private final ConcurrentMap<String, Object> processorMap = new ConcurrentHashMap<>();
 	private final ConcurrentMap<Object, Method> processMap = new ConcurrentHashMap<>();
-	
-	private final String ERROR_EXECUTE = "프로세스 메소드 실행에 실패하였습니다. [ Error: {} ]";
 
 	public void addProcessor(Class<?> clazz) {
 		try {
@@ -59,13 +57,13 @@ public final class ProcessDistinguisher {
 		return null;
 	}
 
-	public void distinguish(ChannelHandlerContext ctx, DataWrapper dataWrapper) throws Exception {
+	public void distinguish(ChannelHandlerContext ctx, DataWrapper dataWrapper) {
 		Method method = processMap.get(dataWrapper.getOperationKey());
 		if (method == null) {
 			throw new NoProcessFoundException();
 		}
 
-		List<Object> parameterList = new ArrayList<Object>();
+		List<Object> parameterList = new ArrayList<>();
 
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (Class<?> c : parameterTypes) {
@@ -94,6 +92,7 @@ public final class ProcessDistinguisher {
 			method.invoke(processor, parameterList.toArray());
 			
 		} catch (Exception e) {
+			String ERROR_EXECUTE = "프로세스 메소드 실행에 실패하였습니다. [ Error: {} ]";
 			logger.error(ERROR_EXECUTE, e.toString());
 		}
 	}

@@ -5,8 +5,8 @@ import lombok.Getter;
 @Getter
 public class ClientConnectionInfo {
 
-	private String id, host;
-	private int port, timeout, cycle;
+	private final String id, host;
+	private final int port, timeout, cycle;
 
 	public ClientConnectionInfo(String id, String host, int port, int timeout, int cycle) {
 		this.id = id;

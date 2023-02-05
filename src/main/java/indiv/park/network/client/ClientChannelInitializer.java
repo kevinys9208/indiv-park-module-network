@@ -1,15 +1,16 @@
 package indiv.park.network.client;
 
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import indiv.park.network.client.config.ClientConnectionInfo;
 import indiv.park.network.processor.ProcessDistinguisher;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import lombok.NonNull;
+
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -24,13 +25,13 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
 	}
 
 	@Override
-	public void initChannel(SocketChannel ch) throws Exception {
+	public void initChannel(@NonNull SocketChannel ch) {
 		clientHandlerList.forEach(clazz -> addPipeLine(ch, clazz));
 	}
 
 	private void addPipeLine(SocketChannel ch, Class<?> clazz) {
 		try {
-			List<Object> parameterList = new ArrayList<Object>();
+			List<Object> parameterList = new ArrayList<>();
 			
 			Constructor<?>[] constructors = clazz.getConstructors();
 			Constructor<?> constructor = Arrays

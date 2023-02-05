@@ -35,9 +35,8 @@ public final class ServerModule implements ModuleBase {
 
 	@Override
 	public void initialize(Class<?> mainClass) {
-		if (configuration != null) {
+		if (configuration != null)
 			addUserServerConfiguration();
-		}
 
 		Reflections reflections = new Reflections(mainClass.getPackage().getName());
 
@@ -60,18 +59,16 @@ public final class ServerModule implements ModuleBase {
 		handlerSet = reflections.getTypesAnnotatedWith(ServerHandler.class);
 		final String found = "확인된 핸들러 : {}";
 		
-		for (Class<?> clazz : handlerSet) {
+		for (Class<?> clazz : handlerSet)
 			logger.info(found, clazz.getSimpleName());
-		}
 	}
 
 	private void loadProcessorList(Reflections reflections) {
 		processorSet = reflections.getTypesAnnotatedWith(ServerProcessor.class);
 		final String found = "확인된 프로세서 : {}";
 		
-		for (Class<?> clazz : processorSet) {
+		for (Class<?> clazz : processorSet)
 			logger.info(found, clazz.getSimpleName());
-		}
 	}
 	
 	public void bind(String group) {
@@ -90,9 +87,8 @@ public final class ServerModule implements ModuleBase {
 		}
 		
 		ServerBinder serverBinder = createServerBinder(configuration);
-		if (Objects.nonNull(serverBinder)) {
-			bindServerOnNewThread(serverBinder, group, sync);
-		}
+
+		bindServerOnNewThread(serverBinder, group, sync);
 	}
 
 	private ServerBinder createServerBinder(ServerConfiguration config) {
@@ -102,12 +98,12 @@ public final class ServerModule implements ModuleBase {
 				.stream()
 				.filter(clazz -> findGroupHandler(clazz, config.group))
 				.sorted(this::compareHandlerOrder)
-				.forEach(clazz -> serverBinder.addServerHandler(clazz));
+				.forEach(serverBinder::addServerHandler);
 
 		processorSet
 				.stream()
 				.filter(clazz -> findGroupProcessor(clazz, config.group))
-				.forEach(clazz -> distinguisher.addProcessor(clazz));
+				.forEach(distinguisher::addProcessor);
 
 		serverBinder.addProcessDistinguisher(distinguisher);
 		
@@ -115,10 +111,7 @@ public final class ServerModule implements ModuleBase {
 	}
 
 	private boolean findGroupHandler(Class<?> clazz, String group) {
-		if (clazz.getAnnotation(ServerHandler.class).group().equals(group)) {
-			return true;
-		}
-		return false;
+		return clazz.getAnnotation(ServerHandler.class).group().equals(group);
 	}
 
 	private int compareHandlerOrder(Class<?> firstHandler, Class<?> secondHandler) {
@@ -128,10 +121,7 @@ public final class ServerModule implements ModuleBase {
 	}
 
 	private boolean findGroupProcessor(Class<?> clazz, String group) {
-		if (clazz.getAnnotation(ServerProcessor.class).group().equals(group)) {
-			return true;
-		}
-		return false;
+		return clazz.getAnnotation(ServerProcessor.class).group().equals(group);
 	}
 	
 	private void bindServerOnNewThread(ServerBinder binder, String group, boolean sync) {
